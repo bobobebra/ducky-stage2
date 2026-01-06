@@ -2,15 +2,25 @@
 FAKE "HACKED" VISUAL DEMO (HARMLESS)
 - No file changes, no network calls, no persistence
 - ESC to quit instantly
+Run locally: powershell -ExecutionPolicy Bypass -File .\stage2.ps1
 #>
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
-function Get-RandIP { "{0}.{1}.{2}.{3}" -f (Get-Random -Min 11 -Max 223), (Get-Random -Min 0 -Max 255), (Get-Random -Min 0 -Max 255), (Get-Random -Min 1 -Max 254) }
-function Get-RandHex([int]$len = 8) { -join ((1..$len) | ForEach-Object { "{0:X}" -f (Get-Random -Min 0 -Max 16) }) }
+# ---------- Helpers ----------
+function Get-RandIP {
+    "{0}.{1}.{2}.{3}" -f (Get-Random -Min 11 -Max 223), (Get-Random -Min 0 -Max 255), (Get-Random -Min 0 -Max 255), (Get-Random -Min 1 -Max 254)
+}
+function Get-RandHex([int]$len = 8) {
+    -join ((1..$len) | ForEach-Object { "{0:X}" -f (Get-Random -Min 0 -Max 16) })
+}
 function Stamp { (Get-Date).ToString("HH:mm:ss.fff") }
-function Add-Line([string]$s) { $script:tb.AppendText($s + "`r`n"); $script:tb.ScrollToEnd() }
+function Add-Line([string]$s) {
+    $script:tb.AppendText($s + "`r`n")
+    $script:tb.ScrollToEnd()
+}
 
+# ---------- Window ----------
 $win = New-Object Windows.Window
 $win.WindowStyle = 'None'
 $win.ResizeMode = 'NoResize'
@@ -23,8 +33,11 @@ $grid = New-Object Windows.Controls.Grid
 $grid.Margin = "18"
 $win.Content = $grid
 
-$row1 = New-Object Windows.Controls.RowDefinition; $row1.Height = "9*"
-$row2 = New-Object Windows.Controls.RowDefinition; $row2.Height = "1*"
+# rows: terminal + progress
+$row1 = New-Object Windows.Controls.RowDefinition
+$row1.Height = "9*"
+$row2 = New-Object Windows.Controls.RowDefinition
+$row2.Height = "1*"
 $grid.RowDefinitions.Add($row1) | Out-Null
 $grid.RowDefinitions.Add($row2) | Out-Null
 
@@ -42,6 +55,7 @@ $tb.CaretBrush = $tb.Foreground
 [Windows.Controls.Grid]::SetRow($tb, 0)
 $grid.Children.Add($tb) | Out-Null
 
+# Progress panel
 $panel = New-Object Windows.Controls.StackPanel
 $panel.Orientation = "Vertical"
 [Windows.Controls.Grid]::SetRow($panel, 1)
@@ -62,13 +76,16 @@ $bar.Height = 18
 $bar.Margin = "0,6,0,0"
 $panel.Children.Add($bar) | Out-Null
 
+# ESC closes immediately
 $win.Add_KeyDown({
     param($sender, $e)
     if ($e.Key -eq 'Escape') { $sender.Close() }
 })
 
+# Keep references global for helper functions
 $script:tb = $tb
 
+# ---------- Fake content ----------
 $hostName = $env:COMPUTERNAME
 $userName = $env:USERNAME
 $os = (Get-CimInstance Win32_OperatingSystem).Caption
@@ -86,6 +103,7 @@ $things = @("tokens","browser cache","credential vault","registry hives","wifi p
 $states = @("OK","WARN","OK","OK","WARN","OK","OK","OK")
 $ports  = @(22,80,443,445,3389,5985,5900,8080,1337,27017,6379)
 
+# Glitch/flicker effect (opacity pulses)
 $flicker = New-Object Windows.Threading.DispatcherTimer
 $flicker.Interval = [TimeSpan]::FromMilliseconds(180)
 $flicker.Add_Tick({
@@ -94,14 +112,17 @@ $flicker.Add_Tick({
 })
 $flicker.Start()
 
+# Main output timer
 $timer = New-Object Windows.Threading.DispatcherTimer
 $timer.Interval = [TimeSpan]::FromMilliseconds(90)
 
 $script:lines = New-Object System.Collections.Generic.Queue[string]
 $script:progress = 0
 
+# Banner
 $banner.Split("`n") | ForEach-Object { $script:lines.Enqueue($_.TrimEnd()) }
 
+# Logs
 1..350 | ForEach-Object {
     $ip  = Get-RandIP
     $v   = $verbs | Get-Random
@@ -112,7 +133,10 @@ $banner.Split("`n") | ForEach-Object { $script:lines.Enqueue($_.TrimEnd()) }
 
     $msg = switch (Get-Random -Min 1 -Max 8) {
         1 { "[$(Stamp)] $v $t … $st" }
-        2 { "[$(Stamp)] CONNECT ${ip}:$p  handshake=$hex  status=$st" }   # <-- FIXED
+
+        # FIXED: no more $ip:$p parsing bug
+        2 { "[$(Stamp)] CONNECT {0}:{1}  handshake={2}  status={3}" -f $ip,$p,$hex,$st }
+
         3 { "[$(Stamp)] TRACE pid=$(Get-Random -Min 300 -Max 9999)  handle=0x$hex  $st" }
         4 { "[$(Stamp)] PACKET $(Get-Random -Min 120 -Max 1500) bytes  src=$ip  flags=0x$(Get-RandHex 2)" }
         5 { "[$(Stamp)] HASH sha256:$hex$(Get-RandHex 20)  verified=$st" }
@@ -120,9 +144,11 @@ $banner.Split("`n") | ForEach-Object { $script:lines.Enqueue($_.TrimEnd()) }
         7 { "[$(Stamp)] MODULE load: kern.$(Get-RandHex 6).dll  sig=$(Get-RandHex 8)  $st" }
         Default { "[$(Stamp)] SYNC chunk $(Get-Random -Min 1 -Max 999)/999  id=$hex  $st" }
     }
+
     $script:lines.Enqueue($msg)
 }
 
+# Ending
 @(
 "-----------------------------------------------",
 "[$(Stamp)] FINALIZING…",
@@ -131,11 +157,15 @@ $banner.Split("`n") | ForEach-Object { $script:lines.Enqueue($_.TrimEnd()) }
 ) | ForEach-Object { $script:lines.Enqueue($_) }
 
 $timer.Add_Tick({
+    # Print a few lines per tick
     $n = Get-Random -Min 1 -Max 4
     1..$n | ForEach-Object {
-        if ($script:lines.Count -gt 0) { Add-Line $script:lines.Dequeue() }
+        if ($script:lines.Count -gt 0) {
+            Add-Line $script:lines.Dequeue()
+        }
     }
 
+    # Progress updates
     if ($script:lines.Count -gt 0) {
         $script:progress = [Math]::Min(100, $script:progress + (Get-Random -Min 0 -Max 3))
         $bar.Value = $script:progress
@@ -146,7 +176,11 @@ $timer.Add_Tick({
         $timer.Stop()
     }
 })
+
 $timer.Start()
 
-$win.ShowDialog() | Out-Null
+# Show window
+$null = $win.ShowDialog()
+
+# Cleanup
 $flicker.Stop()

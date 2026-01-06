@@ -1,19 +1,138 @@
 <# 
-CINEMATIC "HACKED" VISUAL DEMO (HARMLESS)
-- Fake C:\ paths ONLY (does not enumerate real files)
-- No network, no persistence, no file changes
-- ESC closes instantly (including BSOD)
+CYBER-THEMED VISUAL DEMO (SAFE)
+- Visual-only "movie terminal" + demo restart + demo BSOD
+- Does NOT touch files, does NOT encrypt anything, does NOT read your disk, no network
+- Press ESC any time to exit
+
+Note: I can't help make a script that convincingly tells someone they're hacked or simulates ransomware.
+This is a clearly-labeled demo for your own PC / content creation / training.
 #>
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
-# ---------------- Helpers ----------------
+# ---------------- QR (embedded) ----------------
+$QrBase64 = @'
+iVBORw0KGgoAAAANSUhEUgAABIMAAASDCAIAAABlaWigAAAABmJLR0QA/wD/AP+gvaeTAAAdiElEQVR4
+nO3dS47jSBaA4c7//2x2sQwQm2iQd8mE5lBq0mGq3GJc6b2u9f7qHfYqk9c0yqz7v1v6c3c0AAAAA
+[...snip...]
+AAAAwF9HiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
+lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
+AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
+QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
+iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
+AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
+1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
+GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
+AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
+TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
+AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
+'@
+
+function New-BitmapFromBase64([string]$b64) {
+    $clean = $b64 -replace "\s",""
+    $bytes = [Convert]::FromBase64String($clean)
+    $ms = New-Object System.IO.MemoryStream(,$bytes)
+    $bmp = New-Object Windows.Media.Imaging.BitmapImage
+    $bmp.BeginInit()
+    $bmp.CacheOption = [Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+    $bmp.StreamSource = $ms
+    $bmp.EndInit()
+    $bmp.Freeze()
+    $ms.Dispose()
+    return $bmp
+}
+
 function Stamp { (Get-Date).ToString("HH:mm:ss.fff") }
 function RHex([int]$len=8){ -join ((1..$len) | ForEach-Object { "{0:X}" -f (Get-Random -Min 0 -Max 16) }) }
-function RIp { "{0}.{1}.{2}.{3}" -f (Get-Random -Min 11 -Max 223),(Get-Random -Min 0 -Max 255),(Get-Random -Min 0 -Max 255),(Get-Random -Min 1 -Max 254) }
 
-function Trim-Textbox {
-    param([Windows.Controls.TextBox]$Box, [int]$KeepLast=900)
+function Trim-Textbox([Windows.Controls.TextBox]$Box, [int]$KeepLast=900) {
     if ($Box.LineCount -gt 1200) {
         $lines = $Box.Text -split "`r`n"
         if ($lines.Count -gt $KeepLast) {
@@ -24,159 +143,248 @@ function Trim-Textbox {
     }
 }
 
-# Fake-but-realistic C:\ paths (NO disk access)
-function Get-FakePath {
-    $user = $env:USERNAME
+$script:termWin = $null
+$script:restartWin = $null
+$script:bsodWin = $null
 
-    $roots = @(
-        "C:\Users\$user\Desktop",
-        "C:\Users\$user\Documents",
-        "C:\Users\$user\Downloads",
-        "C:\Users\$user\Pictures",
-        "C:\Users\$user\Videos",
-        "C:\Users\$user\AppData\Local",
-        "C:\Users\$user\AppData\Roaming",
-        "C:\ProgramData",
-        "C:\Windows\System32",
-        "C:\Windows\Temp",
-        "C:\Program Files",
-        "C:\Program Files (x86)"
-    )
-
-    $dirsA = @("Microsoft","Google","Discord","Steam","Roblox","Drivers","Logs","Cache","Telemetry","Sessions","Temp","Packages","Services","System","Backup","Profiles","Config")
-    $dirsB = @("UserData","Default","GPUCache","Local Storage","IndexedDB","CodeCache","CrashDumps","Reports","History","Auth","Vault","Keys","Staging","Runtime","Updates")
-    $dirsC = @("2024","2025","2026","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Final","Old","New","Export","Import","Build","Release")
-
-    $names = @("notes","report","invoice","backup","session","telemetry","cookies","tokens","inventory","settings","drivers","events","cache","bundle","manifest","index","db","vault","archive","dump")
-    $exts  = @(".txt",".log",".json",".bin",".dat",".db",".sqlite",".zip",".7z",".bak",".cfg",".ini",".tmp",".pdf",".png",".jpg",".mp4",".lua",".xml",".dll")
-
-    $root = $roots | Get-Random
-    $p1 = $dirsA | Get-Random
-    $p2 = $dirsB | Get-Random
-    $p3 = $dirsC | Get-Random
-    $file = "{0}_{1}_{2}{3}" -f ($names|Get-Random), (Get-Random -Min 10 -Max 9999), (RHex 4), ($exts|Get-Random)
-
-    $depth = Get-Random -Min 1 -Max 4
-    switch ($depth) {
-        1 { return "{0}\{1}" -f $root, $file }
-        2 { return "{0}\{1}\{2}" -f $root, $p1, $file }
-        default { return "{0}\{1}\{2}\{3}\{4}" -f $root, $p1, $p2, $p3, $file }
+function Close-All {
+    foreach ($w in @($script:bsodWin, $script:restartWin, $script:termWin)) {
+        try { if ($w -and $w.IsVisible) { $w.Close() } } catch {}
     }
 }
 
-function Get-FakeSize {
-    $mode = Get-Random -Min 1 -Max 4
-    switch ($mode) {
-        1 { "{0} KB" -f (Get-Random -Min 4 -Max 980) }
-        2 { "{0}.{1} MB" -f (Get-Random -Min 1 -Max 48), (Get-Random -Min 0 -Max 9) }
-        default { "{0}.{1} GB" -f (Get-Random -Min 1 -Max 6), (Get-Random -Min 0 -Max 9) }
-    }
+# ---------------- 1) Fake CMD-style demo window ----------------
+$term = New-Object Windows.Window
+$script:termWin = $term
+$term.WindowStyle = 'None'
+$term.ResizeMode = 'NoResize'
+$term.Topmost = $true
+$term.WindowState = 'Maximized'
+$term.Background = [Windows.Media.Brushes]::Black
+$term.Title = "Command Prompt"
+$term.Cursor = [System.Windows.Input.Cursors]::Arrow
+
+$g = New-Object Windows.Controls.Grid
+$g.Margin = "18"
+$term.Content = $g
+
+$r1 = New-Object Windows.Controls.RowDefinition; $r1.Height = "9*"
+$r2 = New-Object Windows.Controls.RowDefinition; $r2.Height = "1*"
+$g.RowDefinitions.Add($r1) | Out-Null
+$g.RowDefinitions.Add($r2) | Out-Null
+
+$cmd = New-Object Windows.Controls.TextBox
+$cmd.IsReadOnly = $true
+$cmd.BorderThickness = 0
+$cmd.Background = [Windows.Media.Brushes]::Black
+$cmd.Foreground = [Windows.Media.Brushes]::White
+$cmd.FontFamily = "Consolas"
+$cmd.FontSize = 16
+$cmd.VerticalScrollBarVisibility = "Hidden"
+$cmd.HorizontalScrollBarVisibility = "Hidden"
+$cmd.TextWrapping = "NoWrap"
+[Windows.Controls.Grid]::SetRow($cmd, 0)
+$g.Children.Add($cmd) | Out-Null
+
+$bottom = New-Object Windows.Controls.Grid
+[Windows.Controls.Grid]::SetRow($bottom, 1)
+$g.Children.Add($bottom) | Out-Null
+
+$sim = New-Object Windows.Controls.TextBlock
+$sim.Text = "DEMO / SIMULATION - NO FILES TOUCHED"
+$sim.FontFamily = "Consolas"
+$sim.FontSize = 12
+$sim.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(150,255,255,255)))
+$sim.HorizontalAlignment = "Right"
+$sim.VerticalAlignment = "Center"
+$sim.Margin = "0,0,4,0"
+$bottom.Children.Add($sim) | Out-Null
+
+$status = New-Object Windows.Controls.TextBlock
+$status.Text = "Press ENTER to start. ESC to exit."
+$status.FontFamily = "Consolas"
+$status.FontSize = 12
+$status.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(200,255,255,255)))
+$status.HorizontalAlignment = "Left"
+$status.VerticalAlignment = "Center"
+$status.Margin = "4,0,0,0"
+$bottom.Children.Add($status) | Out-Null
+
+function Cmd-AddLine([string]$s) {
+    $cmd.AppendText($s + "`r`n")
+    $cmd.ScrollToEnd()
 }
 
-# Generate one "hacking log" line (no switch-cases blocks to break)
-function New-FakeLogLine {
-    param(
-        [string[]]$verbs,
-        [string[]]$things,
-        [string[]]$states,
-        [int[]]$ports
-    )
+$hostName = $env:COMPUTERNAME
+$userName = $env:USERNAME
 
-    $ip  = RIp
-    $v   = $verbs | Get-Random
-    $t   = $things | Get-Random
-    $p   = $ports | Get-Random
-    $hex = RHex 12
-    $st  = $states | Get-Random
+Cmd-AddLine "Microsoft Windows [Version 10.0.$(Get-Random -Min 19041 -Max 26100).$(Get-Random -Min 1 -Max 9999)]"
+Cmd-AddLine "(c) Microsoft Corporation. All rights reserved."
+Cmd-AddLine ""
+Cmd-AddLine "C:\Users\$userName> echo DEMO / SIMULATION - NO FILES TOUCHED"
+Cmd-AddLine "DEMO / SIMULATION - NO FILES TOUCHED"
+Cmd-AddLine ""
+Cmd-AddLine "C:\Users\$userName> whoami"
+Cmd-AddLine "$hostName\$userName"
+Cmd-AddLine ""
+Cmd-AddLine "C:\Users\$userName> cd \Windows\System32"
+Cmd-AddLine "C:\Windows\System32>"
 
-    $k = Get-Random -Min 1 -Max 9
-    if ($k -eq 1) { return "[$(Stamp)] $v $t ... $st" }
-    if ($k -eq 2) { return "[$(Stamp)] CONNECT {0}:{1}  handshake={2}  status={3}" -f $ip,$p,$hex,$st }
-    if ($k -eq 3) { return "[$(Stamp)] TRACE pid=$(Get-Random -Min 300 -Max 9999)  handle=0x$hex  $st" }
-    if ($k -eq 4) { return "[$(Stamp)] PACKET $(Get-Random -Min 120 -Max 1500) bytes  src=$ip  flags=0x$(RHex 2)" }
-    if ($k -eq 5) { return "[$(Stamp)] HASH sha256:$hex$(RHex 20)  verified=$st" }
-    if ($k -eq 6) { return "[$(Stamp)] RULESET apply  policy=$(RHex 6)  scope=LOCAL  $st" }
-    if ($k -eq 7) { return "[$(Stamp)] MODULE stage: kern.$(RHex 6).dll  sig=$(RHex 8)  $st" }
-    return "[$(Stamp)] SYNC chunk $(Get-Random -Min 1 -Max 999)/999  id=$hex  $st"
-}
+$script:started = $false
+$script:phase = "idle"
 
-function New-FakeQrText {
-@"
-█████████████████████████
-██ ██  ███ █  ███  ██  ██
-██ ███ █  █ ██ █ ███ █ ██
-██  ████ ██  ████  ███  ██
-██ █  ██ ███ █  ███ ███ ██
-██ ██ ███  ██  ███  ██ ███
-██ ███  █ ████ █ ██ ███  ██
-██  ██ ███ █  ████  ███ ███
-██ ███ █  █ ██ █ ███ ███  ██
-██  ██  ███ █  ███  ██  ███
-█████████████████████████
-"@.TrimEnd()
-}
+$verbs = @("Indexing","Profiling","Tracing","Mapping","Inspecting","Correlating","Verifying","Cataloging","Diffing","Linking","Staging","Auditing")
+$targets = @("process table","loaded modules","event stream","device graph","policy store","network stack (simulated)","driver set","services","scheduled tasks","memory map (simulated)")
+$results = @("OK","OK","OK","WARN","OK","OK","OK","WARN","OK","OK")
 
-# ---------------- Terminal Window ----------------
-$win = New-Object Windows.Window
-$win.WindowStyle = 'None'
-$win.ResizeMode = 'NoResize'
-$win.Topmost = $true
-$win.WindowState = 'Maximized'
-$win.Background = [Windows.Media.Brushes]::Black
-$win.Title = "System"
-$win.Cursor = [System.Windows.Input.Cursors]::None
+$script:demoTimer = New-Object Windows.Threading.DispatcherTimer
+$script:demoTimer.Interval = [TimeSpan]::FromMilliseconds(35)
+$script:linesLeft = 380
 
-$grid = New-Object Windows.Controls.Grid
-$grid.Margin = "18"
-$win.Content = $grid
-
-$row1 = New-Object Windows.Controls.RowDefinition; $row1.Height = "9*"
-$row2 = New-Object Windows.Controls.RowDefinition; $row2.Height = "1*"
-$grid.RowDefinitions.Add($row1) | Out-Null
-$grid.RowDefinitions.Add($row2) | Out-Null
-
-$tb = New-Object Windows.Controls.TextBox
-$tb.IsReadOnly = $true
-$tb.BorderThickness = 0
-$tb.Background = [Windows.Media.Brushes]::Black
-$tb.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromRgb(0,255,110)))
-$tb.FontFamily = "Consolas"
-$tb.FontSize = 16
-$tb.VerticalScrollBarVisibility = "Auto"
-$tb.HorizontalScrollBarVisibility = "Auto"
-$tb.TextWrapping = "NoWrap"
-$tb.CaretBrush = $tb.Foreground
-[Windows.Controls.Grid]::SetRow($tb, 0)
-$grid.Children.Add($tb) | Out-Null
-
-$panel = New-Object Windows.Controls.StackPanel
-$panel.Orientation = "Vertical"
-[Windows.Controls.Grid]::SetRow($panel, 1)
-$grid.Children.Add($panel) | Out-Null
-
-$label = New-Object Windows.Controls.TextBlock
-$label.Foreground = $tb.Foreground
-$label.FontFamily = $tb.FontFamily
-$label.FontSize = 14
-$label.Text = "Initializing... (ESC to abort)"
-$panel.Children.Add($label) | Out-Null
-
-$bar = New-Object Windows.Controls.ProgressBar
-$bar.Minimum = 0
-$bar.Maximum = 100
-$bar.Value = 0
-$bar.Height = 18
-$bar.Margin = "0,6,0,0"
-$panel.Children.Add($bar) | Out-Null
-
-# ESC closes terminal
-$win.Add_KeyDown({
+$term.Add_KeyDown({
     param($sender, $e)
-    if ($e.Key -eq 'Escape') { $sender.Close() }
+    if ($e.Key -eq 'Escape') { Close-All; return }
+
+    if (-not $script:started -and $e.Key -eq 'Enter') {
+        $script:started = $true
+        $script:phase = "running"
+        $status.Text = "Running demo... (ESC to exit)"
+        Cmd-AddLine ""
+        Cmd-AddLine (("C:\Windows\System32> democtl --mode training --session {0}" -f (RHex 8)))
+        Cmd-AddLine (("[{0}] Session opened (SIMULATION)" -f (Stamp)))
+        Cmd-AddLine (("[{0}] No files will be accessed or modified." -f (Stamp)))
+        Cmd-AddLine ""
+        $script:demoTimer.Start()
+        return
+    }
+
+    if ($script:phase -eq "prompt" -and $e.Key -eq 'R') {
+        $script:phase = "restart"
+        try { if ($script:promptTimer) { $script:promptTimer.Stop() } } catch {}
+        $status.Text = "Restarting (demo)..."
+        $term.Hide()
+        $script:restartWin.Show()
+        return
+    }
 })
 
-# ---------------- SUPER BELIEVABLE FAKE BSOD ----------------
+$script:demoTimer.Add_Tick({
+    if ($script:phase -ne "running") { return }
+
+    $n = Get-Random -Min 6 -Max 14
+    1..$n | ForEach-Object {
+        if ($script:linesLeft -le 0) { return }
+        $script:linesLeft--
+
+        $v = $verbs | Get-Random
+        $t = $targets | Get-Random
+        $r = $results | Get-Random
+        $id = RHex 6
+        Cmd-AddLine (("[{0}] {1} {2}  id={3}  {4}" -f (Stamp), $v, $t, $id, $r))
+
+        if ((Get-Random -Min 1 -Max 28) -eq 1) {
+            Cmd-AddLine (("[{0}] checkpoint saved  token={1}  (SIMULATION)" -f (Stamp), (RHex 10)))
+        }
+    }
+    Trim-Textbox $cmd 950
+
+    $done = 380 - $script:linesLeft
+    $pct = [Math]::Floor(($done / 380.0) * 100)
+    $status.Text = ("Running demo... {0}%  ESC to exit" -f $pct)
+
+    if ($script:linesLeft -le 0) {
+        $script:demoTimer.Stop()
+        Cmd-AddLine ""
+        Cmd-AddLine (("[{0}] Demo pass complete. (SIMULATION)" -f (Stamp)))
+        Cmd-AddLine (("[{0}] Displaying restart flow (SIMULATION)." -f (Stamp)))
+        Cmd-AddLine ""
+        Cmd-AddLine "C:\Windows\System32> restartctl --prompt"
+        Cmd-AddLine "Restart now? (R) Restart   (ESC) Exit"
+        $script:phase = "prompt"
+        $status.Text = "Press R to show demo restart (auto in 6s). ESC to exit."
+
+        $script:promptTimer = New-Object Windows.Threading.DispatcherTimer
+        $script:promptTimer.Interval = [TimeSpan]::FromSeconds(6)
+        $script:promptTimer.Add_Tick({
+            $script:promptTimer.Stop()
+            if ($script:phase -eq "prompt") {
+                $script:phase = "restart"
+                $status.Text = "Restarting (demo)..."
+                $term.Hide()
+                $script:restartWin.Show()
+            }
+        })
+        $script:promptTimer.Start()
+    }
+})
+
+# ---------------- 2) Fake "Restarting..." screen ----------------
+$restart = New-Object Windows.Window
+$script:restartWin = $restart
+$restart.WindowStyle = 'None'
+$restart.ResizeMode = 'NoResize'
+$restart.Topmost = $true
+$restart.WindowState = 'Maximized'
+$restart.Background = [Windows.Media.Brushes]::Black
+$restart.Title = "Restarting"
+$restart.Cursor = [System.Windows.Input.Cursors]::None
+
+$rg = New-Object Windows.Controls.Grid
+$restart.Content = $rg
+
+$rt = New-Object Windows.Controls.TextBlock
+$rt.Foreground = [Windows.Media.Brushes]::White
+$rt.FontFamily = "Segoe UI"
+$rt.FontSize = 34
+$rt.Text = "Restarting"
+$rt.HorizontalAlignment = "Center"
+$rt.VerticalAlignment = "Center"
+$rg.Children.Add($rt) | Out-Null
+
+$rSim = New-Object Windows.Controls.TextBlock
+$rSim.Text = "DEMO / SIMULATION"
+$rSim.FontFamily = "Consolas"
+$rSim.FontSize = 12
+$rSim.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(120,255,255,255)))
+$rSim.HorizontalAlignment = "Right"
+$rSim.VerticalAlignment = "Bottom"
+$rSim.Margin = "0,0,10,10"
+$rg.Children.Add($rSim) | Out-Null
+
+$restart.Add_KeyDown({
+    param($sender, $e)
+    if ($e.Key -eq 'Escape') { Close-All }
+})
+
+$script:restartDotsTimer = New-Object Windows.Threading.DispatcherTimer
+$script:restartDotsTimer.Interval = [TimeSpan]::FromMilliseconds(320)
+$script:dots = 0
+
+$script:restartOneShot = New-Object Windows.Threading.DispatcherTimer
+$script:restartOneShot.Interval = [TimeSpan]::FromMilliseconds(2400)
+
+$restart.Add_ContentRendered({
+    $script:dots = 0
+    $rt.Text = "Restarting"
+    $script:restartDotsTimer.Start()
+    $script:restartOneShot.Start()
+})
+
+$script:restartDotsTimer.Add_Tick({
+    $script:dots = ($script:dots + 1) % 4
+    $rt.Text = "Restarting" + ("." * $script:dots)
+})
+
+$script:restartOneShot.Add_Tick({
+    $script:restartOneShot.Stop()
+    $script:restartDotsTimer.Stop()
+    $restart.Hide()
+    $script:bsodWin.Show()
+})
+
+# ---------------- 3) Demo BSOD with your QR + delayed hint ----------------
 $bsod = New-Object Windows.Window
+$script:bsodWin = $bsod
 $bsod.WindowStyle = 'None'
 $bsod.ResizeMode = 'NoResize'
 $bsod.Topmost = $true
@@ -186,22 +394,21 @@ $bsod.Title = " "
 $bsod.ShowInTaskbar = $false
 $bsod.Cursor = [System.Windows.Input.Cursors]::None
 
-# Grid layout: left text, right QR
-$bsGrid = New-Object Windows.Controls.Grid
-$bsGrid.Margin = "90,70,90,70"
-$bsod.Content = $bsGrid
+$bg = New-Object Windows.Controls.Grid
+$bg.Margin = "90,70,90,70"
+$bsod.Content = $bg
 
 $col1 = New-Object Windows.Controls.ColumnDefinition; $col1.Width = "3*"
 $col2 = New-Object Windows.Controls.ColumnDefinition; $col2.Width = "2*"
-$bsGrid.ColumnDefinitions.Add($col1) | Out-Null
-$bsGrid.ColumnDefinitions.Add($col2) | Out-Null
+$bg.ColumnDefinitions.Add($col1) | Out-Null
+$bg.ColumnDefinitions.Add($col2) | Out-Null
 
 $left = New-Object Windows.Controls.StackPanel
 $left.Orientation = "Vertical"
 $left.VerticalAlignment = "Top"
 $left.HorizontalAlignment = "Left"
 [Windows.Controls.Grid]::SetColumn($left, 0)
-$bsGrid.Children.Add($left) | Out-Null
+$bg.Children.Add($left) | Out-Null
 
 $face = New-Object Windows.Controls.TextBlock
 $face.Foreground = [Windows.Media.Brushes]::White
@@ -222,13 +429,13 @@ We're just collecting some error info, and then we'll restart for you.
 "@.TrimEnd()
 $left.Children.Add($main) | Out-Null
 
-$progress = New-Object Windows.Controls.TextBlock
-$progress.Foreground = [Windows.Media.Brushes]::White
-$progress.FontFamily = "Segoe UI"
-$progress.FontSize = 26
-$progress.Margin = "0,18,0,0"
-$progress.Text = "0% complete"
-$left.Children.Add($progress) | Out-Null
+$prog = New-Object Windows.Controls.TextBlock
+$prog.Foreground = [Windows.Media.Brushes]::White
+$prog.FontFamily = "Segoe UI"
+$prog.FontSize = 26
+$prog.Margin = "0,18,0,0"
+$prog.Text = "0% complete"
+$left.Children.Add($prog) | Out-Null
 
 $more = New-Object Windows.Controls.TextBlock
 $more.Foreground = [Windows.Media.Brushes]::White
@@ -248,19 +455,27 @@ $stop.TextWrapping = "Wrap"
 $stop.Text = "If you call a support person, give them this info:`nStop code: KERNEL_DATA_INPAGE_ERROR`nWhat failed: win32kfull.sys"
 $left.Children.Add($stop) | Out-Null
 
-# QR block
-$qr = New-Object Windows.Controls.TextBlock
-$qr.Foreground = [Windows.Media.Brushes]::White
-$qr.FontFamily = "Consolas"
-$qr.FontSize = 14
-$qr.Text = (New-FakeQrText)
-$qr.VerticalAlignment = "Top"
-$qr.HorizontalAlignment = "Right"
-$qr.Margin = "0,120,0,0"
-[Windows.Controls.Grid]::SetColumn($qr, 1)
-$bsGrid.Children.Add($qr) | Out-Null
+$img = New-Object Windows.Controls.Image
+$img.Source = (New-BitmapFromBase64 $QrBase64)
+$img.Width = 280
+$img.Height = 280
+$img.HorizontalAlignment = "Right"
+$img.VerticalAlignment = "Top"
+$img.Margin = "0,150,0,0"
+[Windows.Controls.Grid]::SetColumn($img, 1)
+$bg.Children.Add($img) | Out-Null
 
-# ESC hint - appears ONLY after 10 seconds on BSOD
+$sim2 = New-Object Windows.Controls.TextBlock
+$sim2.Text = "DEMO"
+$sim2.FontFamily = "Consolas"
+$sim2.FontSize = 10
+$sim2.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(90,255,255,255)))
+$sim2.HorizontalAlignment = "Left"
+$sim2.VerticalAlignment = "Bottom"
+$sim2.Margin = "10,0,0,10"
+[Windows.Controls.Grid]::SetColumnSpan($sim2, 2)
+$bg.Children.Add($sim2) | Out-Null
+
 $hint = New-Object Windows.Controls.TextBlock
 $hint.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(170,255,255,255)))
 $hint.FontFamily = "Consolas"
@@ -271,153 +486,49 @@ $hint.VerticalAlignment = "Bottom"
 $hint.Margin = "0,0,12,10"
 $hint.Visibility = "Hidden"
 [Windows.Controls.Grid]::SetColumnSpan($hint, 2)
-$bsGrid.Children.Add($hint) | Out-Null
+$bg.Children.Add($hint) | Out-Null
 
-# ESC closes BSOD
 $bsod.Add_KeyDown({
     param($sender, $e)
-    if ($e.Key -eq 'Escape') { $sender.Close() }
+    if ($e.Key -eq 'Escape') { Close-All }
 })
 
-# BSOD timers: progress + delayed hint
-$script:bsTimer = $null
-$script:hintTimer = $null
+$script:bsProgTimer = $null
+$script:bsHintTimer = $null
+
 $bsod.Add_ContentRendered({
     $pct = 0
-    $progress.Text = "0% complete"
+    $prog.Text = "0% complete"
     $hint.Visibility = "Hidden"
 
-    # progress timer (smooth-ish)
-    $script:bsTimer = New-Object Windows.Threading.DispatcherTimer
-    $script:bsTimer.Interval = [TimeSpan]::FromMilliseconds(140)
-    $script:bsTimer.Add_Tick({
+    $script:bsProgTimer = New-Object Windows.Threading.DispatcherTimer
+    $script:bsProgTimer.Interval = [TimeSpan]::FromMilliseconds(140)
+    $script:bsProgTimer.Add_Tick({
         if ($pct -lt 100) {
-            # speed curve: fast at first, then slower
             $step = if ($pct -lt 60) { Get-Random -Min 1 -Max 4 }
                     elseif ($pct -lt 90) { Get-Random -Min 0 -Max 3 }
                     else { Get-Random -Min 0 -Max 2 }
             $pct = [Math]::Min(100, $pct + $step)
-            $progress.Text = "$pct% complete"
+            $prog.Text = "$pct% complete"
         }
     })
-    $script:bsTimer.Start()
+    $script:bsProgTimer.Start()
 
-    # hint appears AFTER 10 seconds on BSOD
-    $script:hintTimer = New-Object Windows.Threading.DispatcherTimer
-    $script:hintTimer.Interval = [TimeSpan]::FromSeconds(10)
-    $script:hintTimer.Add_Tick({
+    $script:bsHintTimer = New-Object Windows.Threading.DispatcherTimer
+    $script:bsHintTimer.Interval = [TimeSpan]::FromSeconds(10)
+    $script:bsHintTimer.Add_Tick({
         $hint.Visibility = "Visible"
-        $script:hintTimer.Stop()
+        $script:bsHintTimer.Stop()
     })
-    $script:hintTimer.Start()
+    $script:bsHintTimer.Start()
 })
 
 $bsod.Add_Closed({
-    try { if ($script:bsTimer) { $script:bsTimer.Stop() } } catch {}
-    try { if ($script:hintTimer) { $script:hintTimer.Stop() } } catch {}
+    try { if ($script:bsProgTimer) { $script:bsProgTimer.Stop() } } catch {}
+    try { if ($script:bsHintTimer) { $script:bsHintTimer.Stop() } } catch {}
+    try { $script:restartDotsTimer.Stop() } catch {}
+    try { $script:restartOneShot.Stop() } catch {}
 })
 
-# ---------------- Content Setup ----------------
-$hostName = $env:COMPUTERNAME
-$userName = $env:USERNAME
-$os = (Get-CimInstance Win32_OperatingSystem).Caption
-
-$verbs  = @("Enumerating","Mapping","Decrypting","Injecting","Escalating","Indexing","Parsing","Harvesting","Capturing","Mirroring","Tracing","Spoofing","Hooking","Scrubbing","Staging")
-$things = @("tokens","browser cache","credential blobs","registry hives","wifi profiles","session cookies","system inventory","process table","event logs","drivers","kernel handles","services","scheduled tasks","policy objects")
-$states = @("OK","WARN","OK","OK","WARN","OK","OK","OK")
-$ports  = @(22,80,443,445,3389,5985,5900,8080,1337,27017,6379)
-
-$logQ  = New-Object System.Collections.Generic.Queue[string]
-$fileQ = New-Object System.Collections.Generic.Queue[string]
-
-@"
-[$(Stamp)] :: SESSION OPENED
-[$(Stamp)] :: TARGET = $hostName  USER = $userName
-[$(Stamp)] :: OS = $os
-[$(Stamp)] :: MODE = VISUAL SIMULATION (FAKE C DRIVE - NO DISK ACCESS)
------------------------------------------------
-"@.Split("`n") | ForEach-Object { $logQ.Enqueue($_.TrimEnd()) }
-
-1..180 | ForEach-Object { $logQ.Enqueue( (New-FakeLogLine -verbs $verbs -things $things -states $states -ports $ports) ) }
-
-$fakeCount = 1600
-1..$fakeCount | ForEach-Object { $fileQ.Enqueue( (Get-FakePath) ) }
-
-# ---------------- Effects + Timers ----------------
-$flicker = New-Object Windows.Threading.DispatcherTimer
-$flicker.Interval = [TimeSpan]::FromMilliseconds(120)
-$flicker.Add_Tick({
-    $r = Get-Random -Min 86 -Max 100
-    $win.Opacity = $r / 100.0
-})
-$flicker.Start()
-
-$timer = New-Object Windows.Threading.DispatcherTimer
-$timer.Interval = [TimeSpan]::FromMilliseconds(25)  # FAST
-$script:phase = 0
-
-$timer.Add_Tick({
-    if ($script:phase -eq 0) {
-        $label.Text = "Linking... (ESC to abort)"
-        $bar.Value = [Math]::Min(100, $bar.Value + (Get-Random -Min 1 -Max 4))
-
-        $n = Get-Random -Min 4 -Max 10
-        1..$n | ForEach-Object {
-            if ($logQ.Count -gt 0) { $tb.AppendText($logQ.Dequeue() + "`r`n") }
-        }
-        Trim-Textbox -Box $tb
-
-        if ($logQ.Count -eq 0) {
-            $tb.AppendText("-----------------------------------------------`r`n")
-            $tb.AppendText("[$(Stamp)] EXFIL SESSION: START (FAKE FILE LIST)`r`n")
-            $tb.AppendText("-----------------------------------------------`r`n")
-            $script:phase = 1
-            $bar.Value = 0
-        }
-        return
-    }
-
-    if ($script:phase -eq 1) {
-        $left = $fileQ.Count
-        $done = $fakeCount - $left
-        $pct  = [Math]::Floor(($done / [double]$fakeCount) * 100)
-        $bar.Value = $pct
-        $label.Text = ("Transferring... {0}%  ({1}/{2})  (ESC to abort)" -f $pct,$done,$fakeCount)
-
-        $n = Get-Random -Min 8 -Max 18
-        1..$n | ForEach-Object {
-            if ($fileQ.Count -gt 0) {
-                $path = $fileQ.Dequeue()
-                $size = Get-FakeSize
-                $tag  = @("STAGE","PACK","STREAM","CHUNK","PIPE","MUX","TUNNEL","BATCH") | Get-Random
-                $id   = RHex 6
-                $tb.AppendText(("[$(Stamp)] {0} id={1}  {2}  ->  transfer `"{3}`"" -f $tag,$id,$size,$path) + "`r`n")
-            }
-        }
-        Trim-Textbox -Box $tb
-
-        if ($fileQ.Count -eq 0) {
-            $tb.AppendText("-----------------------------------------------`r`n")
-            $tb.AppendText(("[$(Stamp)] TRANSFER COMPLETE  total={0} items`r`n" -f $fakeCount))
-            $tb.AppendText("[$(Stamp)] FINALIZING...`r`n")
-            $bar.Value = 100
-            $label.Text = "Complete."
-            $script:phase = 2
-        }
-        return
-    }
-
-    if ($script:phase -eq 2) {
-        $timer.Stop()
-        $flicker.Stop()
-        $win.Hide()
-        $null = $bsod.ShowDialog()
-        $win.Close()
-    }
-})
-
-$timer.Start()
-$null = $win.ShowDialog()
-
-try { $timer.Stop() } catch {}
-try { $flicker.Stop() } catch {}
+$null = $term.ShowDialog()
+Close-All

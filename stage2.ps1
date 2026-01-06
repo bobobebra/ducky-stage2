@@ -7,61 +7,6 @@ CYBER VISUAL DEMO (SAFE)
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
-# ---------------- Embedded QR (your image) ----------------
-$QrBase64 = @'
-iVBORw0KGgoAAAANSUhEUgAABIMAAASDCAIAAABlaWigAAAABmJLR0QA/wD/AP+gvaeTAAAdiElEQVR4
-nO3dS47jSBaA4c7//2x2sQwQm2iQd8mE5lBq0mGq3GJc6b2u9f7qHfYqk9c0yqz7v1v6c3c0AAAAA
-AAAAAAAgv0d6AAAA0JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
-lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
-AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
-QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
-iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
-AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
-1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
-GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
-AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
-TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
-AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
-ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
-lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
-AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
-QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
-iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
-AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
-1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
-GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
-AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
-TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
-AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
-ANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADU
-lBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQY
-AABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAA
-QE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBN
-iQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkB
-AADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA
-1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSU
-GAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgA
-AEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABA
-TYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2J
-AQAA1JQYAABATYkBAADUlBgAAEBNiQEAANSUGAAAQE2JAQAA1JQYAABATYkBAADUlBgAAEBNiQEA
-ANSUGAAAQE2JAQAA
-'@
-
-function New-BitmapFromBase64([string]$b64) {
-    $clean = $b64 -replace "\s",""
-    $bytes = [Convert]::FromBase64String($clean)
-    $ms = New-Object System.IO.MemoryStream(,$bytes)
-    $bmp = New-Object Windows.Media.Imaging.BitmapImage
-    $bmp.BeginInit()
-    $bmp.CacheOption = [Windows.Media.Imaging.BitmapCacheOption]::OnLoad
-    $bmp.StreamSource = $ms
-    $bmp.EndInit()
-    $bmp.Freeze()
-    $ms.Dispose()
-    return $bmp
-}
-
-# ---------------- Common helpers ----------------
 function Stamp { (Get-Date).ToString("HH:mm:ss.fff") }
 function RHex([int]$len=8){ -join ((1..$len) | ForEach-Object { "{0:X}" -f (Get-Random -Min 0 -Max 16) }) }
 
@@ -86,7 +31,7 @@ function Close-All {
     }
 }
 
-# ---------------- Window 1: Auto-scrolling terminal demo ----------------
+# ---------------- Window 1: Auto-scrolling "terminal" demo ----------------
 $w = New-Object Windows.Window
 $global:W1 = $w
 $w.WindowStyle = 'None'
@@ -110,7 +55,7 @@ $tb = New-Object Windows.Controls.TextBox
 $tb.IsReadOnly = $true
 $tb.BorderThickness = 0
 $tb.Background = [Windows.Media.Brushes]::Black
-$tb.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromRgb(0,255,110)))
+$tb.Foreground = [Windows.Media.Brushes]::White
 $tb.FontFamily = "Consolas"
 $tb.FontSize = 16
 $tb.VerticalScrollBarVisibility = "Hidden"
@@ -127,7 +72,7 @@ $left = New-Object Windows.Controls.TextBlock
 $left.Text = "DEMO / VISUAL ONLY — ESC to exit"
 $left.FontFamily = "Consolas"
 $left.FontSize = 12
-$left.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(190,0,255,110)))
+$left.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(190,255,255,255)))
 $left.HorizontalAlignment = "Left"
 $left.VerticalAlignment = "Center"
 $left.Margin = "4,0,0,0"
@@ -137,7 +82,7 @@ $right = New-Object Windows.Controls.TextBlock
 $right.Text = "Auto-scroll ON"
 $right.FontFamily = "Consolas"
 $right.FontSize = 12
-$right.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(140,0,255,110)))
+$right.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(140,255,255,255)))
 $right.HorizontalAlignment = "Right"
 $right.VerticalAlignment = "Center"
 $right.Margin = "0,0,4,0"
@@ -149,7 +94,7 @@ function Add-TermLine([string]$s) {
     $tb.ScrollToEnd()
 }
 
-# Fake path generator (still fake; no disk access)
+# Fake path generator (strings only; no disk access)
 function FakePath {
     $u = $env:USERNAME
     $roots = @(
@@ -163,7 +108,6 @@ function FakePath {
     "{0}\{1}\{2}\{3}_{4}{5}" -f ($roots|Get-Random),($a|Get-Random),($b|Get-Random),($n|Get-Random),(Get-Random -Min 10 -Max 9999),($e|Get-Random)
 }
 
-# Autoscrolling demo stream
 $verbs = @("Linking","Indexing","Profiling","Tracing","Mapping","Auditing","Verifying","Cataloging","Staging","Synthesizing")
 $objs  = @("runtime graph","service map","driver set","event stream","policy store","module table","memory map (sim)","packet flow (sim)")
 $tags  = @("OK","OK","OK","WARN","OK","OK","OK")
@@ -183,7 +127,7 @@ $demoTimer.Add_Tick({
         $id = RHex 6
         Add-TermLine ("[{0}] {1} {2}  id={3}  {4}" -f (Stamp),$v,$o,$id,$t)
 
-        # Occasionally show clearly-labeled simulated "payload" line (not encryption)
+        # clearly labeled simulated line
         if ((Get-Random -Min 1 -Max 22) -eq 1) {
             Add-TermLine ("[{0}] SIMULATION: processing sample item -> {1}" -f (Stamp),(FakePath))
         }
@@ -199,12 +143,8 @@ $demoTimer.Add_Tick({
     }
 })
 
-$w.Add_KeyDown({
-    param($sender,$e)
-    if ($e.Key -eq 'Escape') { Close-All }
-})
+$w.Add_KeyDown({ param($sender,$e) if ($e.Key -eq 'Escape') { Close-All } })
 
-# Start
 Add-TermLine ("[{0}] DEMO SESSION OPENED (VISUAL ONLY)" -f (Stamp))
 Add-TermLine ("[{0}] NOTE: No files are accessed or modified." -f (Stamp))
 Add-TermLine ("[{0}] Press ESC to exit at any time." -f (Stamp))
@@ -270,7 +210,7 @@ $restart.Add_ContentRendered({
     $toBsod.Start()
 })
 
-# ---------------- Window 3: Blue-screen style demo + QR ----------------
+# ---------------- Window 3: Blue-screen style demo ----------------
 $bsod = New-Object Windows.Window
 $global:W3 = $bsod
 $bsod.WindowStyle = 'None'
@@ -286,16 +226,10 @@ $bg = New-Object Windows.Controls.Grid
 $bg.Margin = "90,70,90,70"
 $bsod.Content = $bg
 
-$col1 = New-Object Windows.Controls.ColumnDefinition; $col1.Width = "3*"
-$col2 = New-Object Windows.Controls.ColumnDefinition; $col2.Width = "2*"
-$bg.ColumnDefinitions.Add($col1) | Out-Null
-$bg.ColumnDefinitions.Add($col2) | Out-Null
-
 $stack = New-Object Windows.Controls.StackPanel
 $stack.Orientation = "Vertical"
 $stack.VerticalAlignment = "Top"
 $stack.HorizontalAlignment = "Left"
-[Windows.Controls.Grid]::SetColumn($stack, 0)
 $bg.Children.Add($stack) | Out-Null
 
 $face = New-Object Windows.Controls.TextBlock
@@ -334,16 +268,6 @@ $stop.TextWrapping = "Wrap"
 $stop.Text = "Stop code: DEMO_VISUAL_ONLY`nWhat failed: (none)"
 $stack.Children.Add($stop) | Out-Null
 
-$img = New-Object Windows.Controls.Image
-$img.Source = (New-BitmapFromBase64 $QrBase64)
-$img.Width = 280
-$img.Height = 280
-$img.HorizontalAlignment = "Right"
-$img.VerticalAlignment = "Top"
-$img.Margin = "0,150,0,0"
-[Windows.Controls.Grid]::SetColumn($img, 1)
-$bg.Children.Add($img) | Out-Null
-
 $hint = New-Object Windows.Controls.TextBlock
 $hint.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(200,255,255,255)))
 $hint.FontFamily = "Consolas"
@@ -352,7 +276,7 @@ $hint.Text = "Press ESC to exit demo"
 $hint.HorizontalAlignment = "Right"
 $hint.VerticalAlignment = "Bottom"
 $hint.Margin = "0,0,12,10"
-[Windows.Controls.Grid]::SetColumnSpan($hint, 2)
+$hint.Visibility = "Visible"
 $bg.Children.Add($hint) | Out-Null
 
 $bsod.Add_KeyDown({ param($s,$e) if ($e.Key -eq 'Escape') { Close-All } })

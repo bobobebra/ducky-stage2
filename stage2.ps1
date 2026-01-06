@@ -73,7 +73,7 @@ function Get-FakeSize {
     }
 }
 
-# Generate one "hacking log" line without switch-cases (avoids your parse error)
+# Generate one "hacking log" line (no switch-cases blocks to break)
 function New-FakeLogLine {
     param(
         [string[]]$verbs,
@@ -100,6 +100,22 @@ function New-FakeLogLine {
     return "[$(Stamp)] SYNC chunk $(Get-Random -Min 1 -Max 999)/999  id=$hex  $st"
 }
 
+function New-FakeQrText {
+@"
+█████████████████████████
+██ ██  ███ █  ███  ██  ██
+██ ███ █  █ ██ █ ███ █ ██
+██  ████ ██  ████  ███  ██
+██ █  ██ ███ █  ███ ███ ██
+██ ██ ███  ██  ███  ██ ███
+██ ███  █ ████ █ ██ ███  ██
+██  ██ ███ █  ████  ███ ███
+██ ███ █  █ ██ █ ███ ███  ██
+██  ██  ███ █  ███  ██  ███
+█████████████████████████
+"@.TrimEnd()
+}
+
 # ---------------- Terminal Window ----------------
 $win = New-Object Windows.Window
 $win.WindowStyle = 'None'
@@ -108,6 +124,7 @@ $win.Topmost = $true
 $win.WindowState = 'Maximized'
 $win.Background = [Windows.Media.Brushes]::Black
 $win.Title = "System"
+$win.Cursor = [System.Windows.Input.Cursors]::None
 
 $grid = New-Object Windows.Controls.Grid
 $grid.Margin = "18"
@@ -141,7 +158,7 @@ $label = New-Object Windows.Controls.TextBlock
 $label.Foreground = $tb.Foreground
 $label.FontFamily = $tb.FontFamily
 $label.FontSize = 14
-$label.Text = "Initializing… (ESC to abort)"
+$label.Text = "Initializing... (ESC to abort)"
 $panel.Children.Add($label) | Out-Null
 
 $bar = New-Object Windows.Controls.ProgressBar
@@ -152,12 +169,13 @@ $bar.Height = 18
 $bar.Margin = "0,6,0,0"
 $panel.Children.Add($bar) | Out-Null
 
+# ESC closes terminal
 $win.Add_KeyDown({
     param($sender, $e)
     if ($e.Key -eq 'Escape') { $sender.Close() }
 })
 
-# ---------------- Fake BSOD Window ----------------
+# ---------------- SUPER BELIEVABLE FAKE BSOD ----------------
 $bsod = New-Object Windows.Window
 $bsod.WindowStyle = 'None'
 $bsod.ResizeMode = 'NoResize'
@@ -165,41 +183,138 @@ $bsod.Topmost = $true
 $bsod.WindowState = 'Maximized'
 $bsod.Background = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromRgb(0,120,215)))
 $bsod.Title = " "
+$bsod.ShowInTaskbar = $false
+$bsod.Cursor = [System.Windows.Input.Cursors]::None
 
+# Grid layout: left text, right QR
 $bsGrid = New-Object Windows.Controls.Grid
-$bsGrid.Margin = "80"
+$bsGrid.Margin = "90,70,90,70"
 $bsod.Content = $bsGrid
 
-$bsText = New-Object Windows.Controls.TextBlock
-$bsText.Foreground = [Windows.Media.Brushes]::White
-$bsText.FontFamily = "Segoe UI"
-$bsText.FontSize = 28
-$bsText.TextWrapping = "Wrap"
-$bsText.VerticalAlignment = "Top"
-$bsText.HorizontalAlignment = "Left"
-$bsText.Text = @"
-:(
+$col1 = New-Object Windows.Controls.ColumnDefinition; $col1.Width = "3*"
+$col2 = New-Object Windows.Controls.ColumnDefinition; $col2.Width = "2*"
+$bsGrid.ColumnDefinitions.Add($col1) | Out-Null
+$bsGrid.ColumnDefinitions.Add($col2) | Out-Null
+
+$left = New-Object Windows.Controls.StackPanel
+$left.Orientation = "Vertical"
+$left.VerticalAlignment = "Top"
+$left.HorizontalAlignment = "Left"
+[Windows.Controls.Grid]::SetColumn($left, 0)
+$bsGrid.Children.Add($left) | Out-Null
+
+$face = New-Object Windows.Controls.TextBlock
+$face.Foreground = [Windows.Media.Brushes]::White
+$face.FontFamily = "Segoe UI"
+$face.FontSize = 86
+$face.Text = ":("
+$left.Children.Add($face) | Out-Null
+
+$main = New-Object Windows.Controls.TextBlock
+$main.Foreground = [Windows.Media.Brushes]::White
+$main.FontFamily = "Segoe UI"
+$main.FontSize = 28
+$main.TextWrapping = "Wrap"
+$main.Margin = "0,12,0,0"
+$main.Text = @"
 Your PC ran into a problem and needs to restart.
 We're just collecting some error info, and then we'll restart for you.
+"@.TrimEnd()
+$left.Children.Add($main) | Out-Null
 
-Stop code: KERNEL_DATA_INPAGE_ERROR
-What failed: win32kfull.sys
-"@.Trim()
-$bsGrid.Children.Add($bsText) | Out-Null
+$progress = New-Object Windows.Controls.TextBlock
+$progress.Foreground = [Windows.Media.Brushes]::White
+$progress.FontFamily = "Segoe UI"
+$progress.FontSize = 26
+$progress.Margin = "0,18,0,0"
+$progress.Text = "0% complete"
+$left.Children.Add($progress) | Out-Null
 
-$bsTiny = New-Object Windows.Controls.TextBlock
-$bsTiny.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(160,255,255,255)))
-$bsTiny.FontFamily = "Consolas"
-$bsTiny.FontSize = 10
-$bsTiny.Text = "press ESC to exit"
-$bsTiny.HorizontalAlignment = "Right"
-$bsTiny.VerticalAlignment = "Bottom"
-$bsTiny.Margin = "0,0,10,10"
-$bsGrid.Children.Add($bsTiny) | Out-Null
+$more = New-Object Windows.Controls.TextBlock
+$more.Foreground = [Windows.Media.Brushes]::White
+$more.FontFamily = "Segoe UI"
+$more.FontSize = 18
+$more.Margin = "0,18,0,0"
+$more.TextWrapping = "Wrap"
+$more.Text = "For more information about this issue and possible fixes, visit https://www.windows.com/stopcode"
+$left.Children.Add($more) | Out-Null
 
+$stop = New-Object Windows.Controls.TextBlock
+$stop.Foreground = [Windows.Media.Brushes]::White
+$stop.FontFamily = "Segoe UI"
+$stop.FontSize = 18
+$stop.Margin = "0,18,0,0"
+$stop.TextWrapping = "Wrap"
+$stop.Text = "If you call a support person, give them this info:`nStop code: KERNEL_DATA_INPAGE_ERROR`nWhat failed: win32kfull.sys"
+$left.Children.Add($stop) | Out-Null
+
+# QR block
+$qr = New-Object Windows.Controls.TextBlock
+$qr.Foreground = [Windows.Media.Brushes]::White
+$qr.FontFamily = "Consolas"
+$qr.FontSize = 14
+$qr.Text = (New-FakeQrText)
+$qr.VerticalAlignment = "Top"
+$qr.HorizontalAlignment = "Right"
+$qr.Margin = "0,120,0,0"
+[Windows.Controls.Grid]::SetColumn($qr, 1)
+$bsGrid.Children.Add($qr) | Out-Null
+
+# ESC hint - appears ONLY after 10 seconds on BSOD
+$hint = New-Object Windows.Controls.TextBlock
+$hint.Foreground = (New-Object Windows.Media.SolidColorBrush([Windows.Media.Color]::FromArgb(170,255,255,255)))
+$hint.FontFamily = "Consolas"
+$hint.FontSize = 10
+$hint.Text = "Press ESC to continue using PC"
+$hint.HorizontalAlignment = "Right"
+$hint.VerticalAlignment = "Bottom"
+$hint.Margin = "0,0,12,10"
+$hint.Visibility = "Hidden"
+[Windows.Controls.Grid]::SetColumnSpan($hint, 2)
+$bsGrid.Children.Add($hint) | Out-Null
+
+# ESC closes BSOD
 $bsod.Add_KeyDown({
     param($sender, $e)
     if ($e.Key -eq 'Escape') { $sender.Close() }
+})
+
+# BSOD timers: progress + delayed hint
+$script:bsTimer = $null
+$script:hintTimer = $null
+$bsod.Add_ContentRendered({
+    $pct = 0
+    $progress.Text = "0% complete"
+    $hint.Visibility = "Hidden"
+
+    # progress timer (smooth-ish)
+    $script:bsTimer = New-Object Windows.Threading.DispatcherTimer
+    $script:bsTimer.Interval = [TimeSpan]::FromMilliseconds(140)
+    $script:bsTimer.Add_Tick({
+        if ($pct -lt 100) {
+            # speed curve: fast at first, then slower
+            $step = if ($pct -lt 60) { Get-Random -Min 1 -Max 4 }
+                    elseif ($pct -lt 90) { Get-Random -Min 0 -Max 3 }
+                    else { Get-Random -Min 0 -Max 2 }
+            $pct = [Math]::Min(100, $pct + $step)
+            $progress.Text = "$pct% complete"
+        }
+    })
+    $script:bsTimer.Start()
+
+    # hint appears AFTER 10 seconds on BSOD
+    $script:hintTimer = New-Object Windows.Threading.DispatcherTimer
+    $script:hintTimer.Interval = [TimeSpan]::FromSeconds(10)
+    $script:hintTimer.Add_Tick({
+        $hint.Visibility = "Visible"
+        $script:hintTimer.Stop()
+    })
+    $script:hintTimer.Start()
+})
+
+$bsod.Add_Closed({
+    try { if ($script:bsTimer) { $script:bsTimer.Stop() } } catch {}
+    try { if ($script:hintTimer) { $script:hintTimer.Stop() } } catch {}
 })
 
 # ---------------- Content Setup ----------------
@@ -219,13 +334,11 @@ $fileQ = New-Object System.Collections.Generic.Queue[string]
 [$(Stamp)] :: SESSION OPENED
 [$(Stamp)] :: TARGET = $hostName  USER = $userName
 [$(Stamp)] :: OS = $os
-[$(Stamp)] :: MODE = VISUAL SIMULATION (FAKE C:\ INDEX — NO DISK ACCESS)
+[$(Stamp)] :: MODE = VISUAL SIMULATION (FAKE C DRIVE - NO DISK ACCESS)
 -----------------------------------------------
 "@.Split("`n") | ForEach-Object { $logQ.Enqueue($_.TrimEnd()) }
 
-1..180 | ForEach-Object {
-    $logQ.Enqueue( (New-FakeLogLine -verbs $verbs -things $things -states $states -ports $ports) )
-}
+1..180 | ForEach-Object { $logQ.Enqueue( (New-FakeLogLine -verbs $verbs -things $things -states $states -ports $ports) ) }
 
 $fakeCount = 1600
 1..$fakeCount | ForEach-Object { $fileQ.Enqueue( (Get-FakePath) ) }
@@ -245,7 +358,7 @@ $script:phase = 0
 
 $timer.Add_Tick({
     if ($script:phase -eq 0) {
-        $label.Text = "Linking… (ESC to abort)"
+        $label.Text = "Linking... (ESC to abort)"
         $bar.Value = [Math]::Min(100, $bar.Value + (Get-Random -Min 1 -Max 4))
 
         $n = Get-Random -Min 4 -Max 10
@@ -257,7 +370,6 @@ $timer.Add_Tick({
         if ($logQ.Count -eq 0) {
             $tb.AppendText("-----------------------------------------------`r`n")
             $tb.AppendText("[$(Stamp)] EXFIL SESSION: START (FAKE FILE LIST)`r`n")
-            $tb.AppendText("[$(Stamp)] NOTE: This demo does NOT read real files.`r`n")
             $tb.AppendText("-----------------------------------------------`r`n")
             $script:phase = 1
             $bar.Value = 0
@@ -270,7 +382,7 @@ $timer.Add_Tick({
         $done = $fakeCount - $left
         $pct  = [Math]::Floor(($done / [double]$fakeCount) * 100)
         $bar.Value = $pct
-        $label.Text = ("Transferring… {0}%  ({1}/{2})  (ESC to abort)" -f $pct,$done,$fakeCount)
+        $label.Text = ("Transferring... {0}%  ({1}/{2})  (ESC to abort)" -f $pct,$done,$fakeCount)
 
         $n = Get-Random -Min 8 -Max 18
         1..$n | ForEach-Object {
@@ -287,8 +399,7 @@ $timer.Add_Tick({
         if ($fileQ.Count -eq 0) {
             $tb.AppendText("-----------------------------------------------`r`n")
             $tb.AppendText(("[$(Stamp)] TRANSFER COMPLETE  total={0} items`r`n" -f $fakeCount))
-            $tb.AppendText("[$(Stamp)] FINALIZING…`r`n")
-            $tb.AppendText("[$(Stamp)] (demo) switching display mode…`r`n")
+            $tb.AppendText("[$(Stamp)] FINALIZING...`r`n")
             $bar.Value = 100
             $label.Text = "Complete."
             $script:phase = 2

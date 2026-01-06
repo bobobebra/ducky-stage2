@@ -44,29 +44,23 @@ function Get-FakePath {
     )
 
     $dirsA = @("Microsoft","Google","Discord","Steam","Roblox","Drivers","Logs","Cache","Telemetry","Sessions","Temp","Packages","Services","System","Backup","Profiles","Config")
-    $dirsB = @("UserData","Default","GPUCache","Local Storage","IndexedDB","Code Cache","DawnCache","CrashDumps","Reports","History","Auth","Vault","Keys","Staging","Runtime","Updates")
+    $dirsB = @("UserData","Default","GPUCache","Local Storage","IndexedDB","CodeCache","CrashDumps","Reports","History","Auth","Vault","Keys","Staging","Runtime","Updates")
     $dirsC = @("2024","2025","2026","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Final","Old","New","Export","Import","Build","Release")
 
-    $names = @(
-        "notes","report","invoice","backup","session","telemetry","cookies","tokens","inventory","settings",
-        "drivers","events","cache","bundle","manifest","index","db","vault","archive","dump"
-    )
-
-    $exts = @(".txt",".log",".json",".bin",".dat",".db",".sqlite",".zip",".7z",".bak",".cfg",".ini",".tmp",".pdf",".png",".jpg",".mp4",".lua",".xml",".dll")
+    $names = @("notes","report","invoice","backup","session","telemetry","cookies","tokens","inventory","settings","drivers","events","cache","bundle","manifest","index","db","vault","archive","dump")
+    $exts  = @(".txt",".log",".json",".bin",".dat",".db",".sqlite",".zip",".7z",".bak",".cfg",".ini",".tmp",".pdf",".png",".jpg",".mp4",".lua",".xml",".dll")
 
     $root = $roots | Get-Random
     $p1 = $dirsA | Get-Random
     $p2 = $dirsB | Get-Random
     $p3 = $dirsC | Get-Random
-
     $file = "{0}_{1}_{2}{3}" -f ($names|Get-Random), (Get-Random -Min 10 -Max 9999), (RHex 4), ($exts|Get-Random)
 
-    # Randomly choose depth
     $depth = Get-Random -Min 1 -Max 4
     switch ($depth) {
         1 { return "{0}\{1}" -f $root, $file }
         2 { return "{0}\{1}\{2}" -f $root, $p1, $file }
-        Default { return "{0}\{1}\{2}\{3}\{4}" -f $root, $p1, $p2, $p3, $file }
+        default { return "{0}\{1}\{2}\{3}\{4}" -f $root, $p1, $p2, $p3, $file }
     }
 }
 
@@ -75,8 +69,35 @@ function Get-FakeSize {
     switch ($mode) {
         1 { "{0} KB" -f (Get-Random -Min 4 -Max 980) }
         2 { "{0}.{1} MB" -f (Get-Random -Min 1 -Max 48), (Get-Random -Min 0 -Max 9) }
-        Default { "{0}.{1} GB" -f (Get-Random -Min 1 -Max 6), (Get-Random -Min 0 -Max 9) }
+        default { "{0}.{1} GB" -f (Get-Random -Min 1 -Max 6), (Get-Random -Min 0 -Max 9) }
     }
+}
+
+# Generate one "hacking log" line without switch-cases (avoids your parse error)
+function New-FakeLogLine {
+    param(
+        [string[]]$verbs,
+        [string[]]$things,
+        [string[]]$states,
+        [int[]]$ports
+    )
+
+    $ip  = RIp
+    $v   = $verbs | Get-Random
+    $t   = $things | Get-Random
+    $p   = $ports | Get-Random
+    $hex = RHex 12
+    $st  = $states | Get-Random
+
+    $k = Get-Random -Min 1 -Max 9
+    if ($k -eq 1) { return "[$(Stamp)] $v $t ... $st" }
+    if ($k -eq 2) { return "[$(Stamp)] CONNECT {0}:{1}  handshake={2}  status={3}" -f $ip,$p,$hex,$st }
+    if ($k -eq 3) { return "[$(Stamp)] TRACE pid=$(Get-Random -Min 300 -Max 9999)  handle=0x$hex  $st" }
+    if ($k -eq 4) { return "[$(Stamp)] PACKET $(Get-Random -Min 120 -Max 1500) bytes  src=$ip  flags=0x$(RHex 2)" }
+    if ($k -eq 5) { return "[$(Stamp)] HASH sha256:$hex$(RHex 20)  verified=$st" }
+    if ($k -eq 6) { return "[$(Stamp)] RULESET apply  policy=$(RHex 6)  scope=LOCAL  $st" }
+    if ($k -eq 7) { return "[$(Stamp)] MODULE stage: kern.$(RHex 6).dll  sig=$(RHex 8)  $st" }
+    return "[$(Stamp)] SYNC chunk $(Get-Random -Min 1 -Max 999)/999  id=$hex  $st"
 }
 
 # ---------------- Terminal Window ----------------
@@ -131,7 +152,6 @@ $bar.Height = 18
 $bar.Margin = "0,6,0,0"
 $panel.Children.Add($bar) | Out-Null
 
-# ESC closes
 $win.Add_KeyDown({
     param($sender, $e)
     if ($e.Key -eq 'Escape') { $sender.Close() }
@@ -182,7 +202,7 @@ $bsod.Add_KeyDown({
     if ($e.Key -eq 'Escape') { $sender.Close() }
 })
 
-# ---------------- Content Queues ----------------
+# ---------------- Content Setup ----------------
 $hostName = $env:COMPUTERNAME
 $userName = $env:USERNAME
 $os = (Get-CimInstance Win32_OperatingSystem).Caption
@@ -192,10 +212,9 @@ $things = @("tokens","browser cache","credential blobs","registry hives","wifi p
 $states = @("OK","WARN","OK","OK","WARN","OK","OK","OK")
 $ports  = @(22,80,443,445,3389,5985,5900,8080,1337,27017,6379)
 
-$logQ   = New-Object System.Collections.Generic.Queue[string]
-$fileQ  = New-Object System.Collections.Generic.Queue[string]
+$logQ  = New-Object System.Collections.Generic.Queue[string]
+$fileQ = New-Object System.Collections.Generic.Queue[string]
 
-# Banner (explicitly says fake)
 @"
 [$(Stamp)] :: SESSION OPENED
 [$(Stamp)] :: TARGET = $hostName  USER = $userName
@@ -204,36 +223,14 @@ $fileQ  = New-Object System.Collections.Generic.Queue[string]
 -----------------------------------------------
 "@.Split("`n") | ForEach-Object { $logQ.Enqueue($_.TrimEnd()) }
 
-# Warm-up logs
 1..180 | ForEach-Object {
-    $ip  = RIp
-    $v   = $verbs | Get-Random
-    $t   = $things | Get-Random
-    $p   = $ports | Get-Random
-    $hex = RHex 12
-    $st  = $states | Get-Random
-
-    $logQ.Enqueue( (switch (Get-Random -Min 1 -Max 8) {
-        1 { "[$(Stamp)] $v $t … $st" }
-        2 { "[$(Stamp)] CONNECT {0}:{1}  handshake={2}  status={3}" -f $ip,$p,$hex,$st }
-        3 { "[$(Stamp)] TRACE pid=$(Get-Random -Min 300 -Max 9999)  handle=0x$hex  $st" }
-        4 { "[$(Stamp)] PACKET $(Get-Random -Min 120 -Max 1500) bytes  src=$ip  flags=0x$(RHex 2)" }
-        5 { "[$(Stamp)] HASH sha256:$hex$(RHex 20)  verified=$st" }
-        6 { "[$(Stamp)] RULESET apply  policy=$(RHex 6)  scope=LOCAL  $st" }
-        7 { "[$(Stamp)] MODULE stage: kern.$(RHex 6).dll  sig=$(RHex 8)  $st" }
-        Default { "[$(Stamp)] SYNC chunk $(Get-Random -Min 1 -Max 999)/999  id=$hex  $st" }
-    }) )
+    $logQ.Enqueue( (New-FakeLogLine -verbs $verbs -things $things -states $states -ports $ports) )
 }
 
-# Fake "C:\ drive scan" file list
-# (purely generated strings)
 $fakeCount = 1600
-1..$fakeCount | ForEach-Object {
-    $fileQ.Enqueue( (Get-FakePath) )
-}
+1..$fakeCount | ForEach-Object { $fileQ.Enqueue( (Get-FakePath) ) }
 
 # ---------------- Effects + Timers ----------------
-# Flicker
 $flicker = New-Object Windows.Threading.DispatcherTimer
 $flicker.Interval = [TimeSpan]::FromMilliseconds(120)
 $flicker.Add_Tick({
@@ -244,23 +241,16 @@ $flicker.Start()
 
 $timer = New-Object Windows.Threading.DispatcherTimer
 $timer.Interval = [TimeSpan]::FromMilliseconds(25)  # FAST
-$script:phase = 0      # 0=logs, 1=transfer, 2=complete->bsod
-$script:progress = 0
-$script:transferred = 0
-$script:startFiles = $fakeCount
+$script:phase = 0
 
 $timer.Add_Tick({
-    # ESC kill-switch already handled by window key event.
-
     if ($script:phase -eq 0) {
         $label.Text = "Linking… (ESC to abort)"
         $bar.Value = [Math]::Min(100, $bar.Value + (Get-Random -Min 1 -Max 4))
 
         $n = Get-Random -Min 4 -Max 10
         1..$n | ForEach-Object {
-            if ($logQ.Count -gt 0) {
-                $tb.AppendText($logQ.Dequeue() + "`r`n")
-            }
+            if ($logQ.Count -gt 0) { $tb.AppendText($logQ.Dequeue() + "`r`n") }
         }
         Trim-Textbox -Box $tb
 
@@ -271,20 +261,17 @@ $timer.Add_Tick({
             $tb.AppendText("-----------------------------------------------`r`n")
             $script:phase = 1
             $bar.Value = 0
-            $script:progress = 0
         }
         return
     }
 
     if ($script:phase -eq 1) {
-        # Transfer phase (prints fake C:\ paths)
         $left = $fileQ.Count
-        $done = $script:startFiles - $left
-        $pct  = [Math]::Floor(($done / [double]$script:startFiles) * 100)
+        $done = $fakeCount - $left
+        $pct  = [Math]::Floor(($done / [double]$fakeCount) * 100)
         $bar.Value = $pct
-        $label.Text = ("Transferring… {0}%  ({1}/{2})  (ESC to abort)" -f $pct,$done,$script:startFiles)
+        $label.Text = ("Transferring… {0}%  ({1}/{2})  (ESC to abort)" -f $pct,$done,$fakeCount)
 
-        # Speedy printing
         $n = Get-Random -Min 8 -Max 18
         1..$n | ForEach-Object {
             if ($fileQ.Count -gt 0) {
@@ -299,7 +286,7 @@ $timer.Add_Tick({
 
         if ($fileQ.Count -eq 0) {
             $tb.AppendText("-----------------------------------------------`r`n")
-            $tb.AppendText(("[$(Stamp)] TRANSFER COMPLETE  total={0} items`r`n" -f $script:startFiles))
+            $tb.AppendText(("[$(Stamp)] TRANSFER COMPLETE  total={0} items`r`n" -f $fakeCount))
             $tb.AppendText("[$(Stamp)] FINALIZING…`r`n")
             $tb.AppendText("[$(Stamp)] (demo) switching display mode…`r`n")
             $bar.Value = 100
@@ -310,12 +297,10 @@ $timer.Add_Tick({
     }
 
     if ($script:phase -eq 2) {
-        # short beat then BSOD
         $timer.Stop()
         $flicker.Stop()
         $win.Hide()
         $null = $bsod.ShowDialog()
-        # after BSOD closes
         $win.Close()
     }
 })
@@ -323,6 +308,5 @@ $timer.Add_Tick({
 $timer.Start()
 $null = $win.ShowDialog()
 
-# Cleanup
 try { $timer.Stop() } catch {}
 try { $flicker.Stop() } catch {}
